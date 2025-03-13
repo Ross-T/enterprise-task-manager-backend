@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 /**
  * Entity representing a role in the system.
- * Roles are used for authorization and access control.
+ * Roles are used for authorisation and access control.
  */
 @Entity
 @Table(name = "roles")
