@@ -1,8 +1,8 @@
 package com.ross.ese.taskmanager.service.impl;
 
 import com.ross.ese.taskmanager.service.SupabaseAuthService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -17,14 +17,11 @@ import java.util.Map;
  * This provides an enterprise-grade integration with Supabase Auth.
  */
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class SupabaseAuthServiceImpl implements SupabaseAuthService {
 
-    private static final Logger logger = LoggerFactory.getLogger(SupabaseAuthServiceImpl.class);
     private final WebClient supabaseAuthClient;
-    
-    public SupabaseAuthServiceImpl(WebClient supabaseAuthClient) {
-        this.supabaseAuthClient = supabaseAuthClient;
-    }
 
     @Override
     public String signUp(String email, String password, String username) {
@@ -49,10 +46,10 @@ public class SupabaseAuthServiceImpl implements SupabaseAuthService {
                 return (String) response.get("access_token");
             }
             
-            logger.warn("Signup response did not contain access token");
+            log.warn("Signup response did not contain access token");
             return null;
         } catch (Exception e) {
-            logger.error("Error signing up user: {}", e.getMessage());
+            log.error("Error signing up user: {}", e.getMessage());
             return null;
         }
     }
@@ -76,10 +73,10 @@ public class SupabaseAuthServiceImpl implements SupabaseAuthService {
                 return (String) response.get("access_token");
             }
             
-            logger.warn("Signin response did not contain access token");
+            log.warn("Signin response did not contain access token");
             return null;
         } catch (Exception e) {
-            logger.error("Error signing in user: {}", e.getMessage());
+            log.error("Error signing in user: {}", e.getMessage());
             return null;
         }
     }
@@ -97,7 +94,7 @@ public class SupabaseAuthServiceImpl implements SupabaseAuthService {
             
             return response != null && response.containsKey("id");
         } catch (Exception e) {
-            logger.debug("Token verification failed: {}", e.getMessage());
+            log.debug("Token verification failed: {}", e.getMessage());
             return false;
         }
     }
