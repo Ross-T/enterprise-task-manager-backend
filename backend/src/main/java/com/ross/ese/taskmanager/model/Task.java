@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 
 /**
  * Entity representing a task in the system.
- * Tasks are the core work items assigned to users.
  */
 @Entity
 @Table(name = "tasks")
@@ -33,23 +32,17 @@ public class Task {
     private LocalDateTime dueDate;
 
     private LocalDateTime createdAt;
-
+    
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
-
-    @ManyToOne
-    @JoinColumn(name = "assignee_id")
-    private User assignee;
-
-    @ManyToOne
-    @JoinColumn(name = "creator_id")
-    private User creator;
-
+    
+    // Constructor to initialize createdAt
     public Task() {
         this.createdAt = LocalDateTime.now();
     }
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -112,21 +105,5 @@ public class Task {
 
     public void setProject(Project project) {
         this.project = project;
-    }
-
-    public User getAssignee() {
-        return assignee;
-    }
-
-    public void setAssignee(User assignee) {
-        this.assignee = assignee;
-    }
-
-    public User getCreator() {
-        return creator;
-    }
-
-    public void setCreator(User creator) {
-        this.creator = creator;
     }
 }

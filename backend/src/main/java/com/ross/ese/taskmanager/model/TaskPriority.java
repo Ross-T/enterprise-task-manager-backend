@@ -6,6 +6,5 @@ package com.ross.ese.taskmanager.model;
 public enum TaskPriority {
     LOW,
     MEDIUM,
-    HIGH,
-    URGENT
+    HIGH
 }

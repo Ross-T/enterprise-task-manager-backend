@@ -1,7 +1,7 @@
 package com.ross.ese.taskmanager.model;
 
 /**
- * Enumeration of possible task statuses in the workflow.
+ * Enumeration of possible task statuses.
  */
 public enum TaskStatus {
     TODO,
