@@ -20,7 +20,7 @@ jobs:
         cache: maven
     
     - name: Build with Maven (verify compilation only)
-      run: mvn -B compile --file backend/pom.xml
+      run: mvn -B compile
     
     - name: Verify Test Compilation
-      run: mvn -B test-compile --file backend/pom.xml
+      run: mvn -B test-compile

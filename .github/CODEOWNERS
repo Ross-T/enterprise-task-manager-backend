@@ -2,7 +2,4 @@
 * @Ross-T
 
 # Backend code ownership
-/backend/ @Ross-T
-
-# Frontend code ownership  
-/frontend/ @Ross-T
+/src/ @Ross-T
