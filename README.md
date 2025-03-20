@@ -69,8 +69,8 @@ This repository contains the complete backend application - the frontend React i
 ### Local Development Setup
 1. Clone this repository
    ```bash
-   git clone https://github.com/Ross-T/enterprise-task-manager.git
-   cd enterprise-task-manager
+   git clone https://github.com/Ross-T/enterprise-task-manager-backend.git
+   cd enterprise-task-manager-backend
    ```
    
 2. Create a `.env` file in the project root with required environment variables
