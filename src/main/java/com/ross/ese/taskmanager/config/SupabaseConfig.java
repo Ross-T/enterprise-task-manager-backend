@@ -13,9 +13,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 @RequiredArgsConstructor
 public class SupabaseConfig {
-    
+
     private final SupabaseProperties supabaseProperties;
-    
+
     @Bean
     public WebClient supabaseAuthClient() {
         return WebClient.builder()
@@ -23,6 +23,7 @@ public class SupabaseConfig {
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader("apikey", supabaseProperties.getKey())
+                .defaultHeader("Authorization", "Bearer " + supabaseProperties.getKey())
                 .build();
     }
 }
