@@ -6,6 +6,7 @@ import com.ross.ese.taskmanager.dto.MessageResponse;
 import com.ross.ese.taskmanager.dto.SignupRequest;
 import com.ross.ese.taskmanager.service.SupabaseAuthService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,9 @@ import java.util.UUID;
 public class AuthController {
 
     private final SupabaseAuthService authService;
+    
+    @Value("${app.auth.dev-mode:false}")
+    private boolean devMode;
 
     public AuthController(SupabaseAuthService authService) {
         this.authService = authService;
@@ -34,20 +38,25 @@ public class AuthController {
      */
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
-        String token = authService.signUp(
-                signupRequest.getEmail(),
-                signupRequest.getPassword(),
-                signupRequest.getUsername());
-
-        if (token == null) {
+        try {
+            String token = authService.signUp(
+                    signupRequest.getEmail(),
+                    signupRequest.getPassword(),
+                    signupRequest.getUsername());
+    
+            if (token == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new MessageResponse("Error: Registration failed"));
+            }
+    
+            return ResponseEntity.ok(new JwtResponse(
+                    token,
+                    signupRequest.getUsername(),
+                    signupRequest.getEmail()));
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: Registration failed"));
+                    .body(new MessageResponse("Error: " + e.getMessage()));
         }
-
-        return ResponseEntity.ok(new JwtResponse(
-                token,
-                signupRequest.getUsername(),
-                signupRequest.getEmail()));
     }
 
     /**
@@ -76,8 +85,8 @@ public class AuthController {
                                 "Please check your email and confirm your account before logging in"));
             }
 
-            // temporarily bypass email confirmation for development purposes
-            if (true) { // Set to false in production
+            // Use configuration-based development bypass
+            if (devMode) {
                 return ResponseEntity.ok(new JwtResponse(
                         "dev-login-" + UUID.randomUUID().toString(),
                         null,
