@@ -1,12 +1,12 @@
 package com.ross.ese.taskmanager.controller;
 
+import com.ross.ese.taskmanager.config.ApplicationConfig;
 import com.ross.ese.taskmanager.dto.JwtResponse;
 import com.ross.ese.taskmanager.dto.LoginRequest;
 import com.ross.ese.taskmanager.dto.MessageResponse;
 import com.ross.ese.taskmanager.dto.SignupRequest;
 import com.ross.ese.taskmanager.service.SupabaseAuthService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,12 +22,11 @@ import java.util.UUID;
 public class AuthController {
 
     private final SupabaseAuthService authService;
-    
-    @Value("${app.auth.dev-mode:false}")
-    private boolean devMode;
+    private final ApplicationConfig appConfig;
 
-    public AuthController(SupabaseAuthService authService) {
+    public AuthController(SupabaseAuthService authService, ApplicationConfig appConfig) {
         this.authService = authService;
+        this.appConfig = appConfig;
     }
 
     /**
@@ -86,7 +85,7 @@ public class AuthController {
             }
 
             // Use configuration-based development bypass
-            if (devMode) {
+            if (appConfig.isDevMode()) {
                 return ResponseEntity.ok(new JwtResponse(
                         "dev-login-" + UUID.randomUUID().toString(),
                         null,
