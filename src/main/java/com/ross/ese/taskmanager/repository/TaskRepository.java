@@ -35,4 +35,12 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
      * @return List of tasks with the specified status
      */
     List<Task> findByStatus(TaskStatus status);
+
+    /**
+     * Count tasks belonging to a specific project
+     * 
+     * @param projectId The project's ID
+     * @return The number of tasks in the specified project
+     */
+    Integer countByProjectId(Long projectId);
 }

@@ -3,12 +3,12 @@
 ## Solution Overview
 Enterprise Task Manager Backend is a comprehensive Java Spring Boot application that powers the task management system for enterprise teams. It encompasses:
 
-- **Core Business Logic**: Implementing task management workflows, project organization, and business rules
+- **Core Business Logic**: Implementing task management workflows, project organisation, and business rules
 - **Data Management**: Entity relationships, persistence, and data integrity enforcement
-- **Security Layer**: Authentication, authorization, and data protection mechanisms
+- **Security Layer**: Authentication, authorisation, and data protection mechanisms
 - **RESTful APIs**: External interfaces for frontend communication
 - **Service Integration**: Connectivity with Supabase for authentication services
-- **Performance Optimization**: Efficient data processing and response handling
+- **Performance Optimisation**: Efficient data processing and response handling
 
 This repository contains the complete backend application - the frontend React implementation is available in a [separate repository](https://github.com/Ross-T/enterprise-task-manager-frontend).
 
@@ -29,13 +29,13 @@ This repository contains the complete backend application - the frontend React i
 3. Ensure data integrity with comprehensive validation and error handling
 4. Support integration with the React frontend application
 5. Implement enterprise-level security considerations
-6. Optimize performance for enterprise-scale usage
+6. Optimise performance for enterprise-scale usage
 
 ## Features
 - User authentication via Supabase integration
 - Project management with ownership and member access control
 - Task creation, assignment, and status tracking
-- Priority-based task organization
+- Priority-based task organisation
 - Comprehensive validation and error handling
 - Reporting capabilities for task and project status
 - RESTful API endpoints for frontend integration
@@ -123,7 +123,7 @@ mvn test -Dtest=CucumberIntegrationTest
 
 ## Deployment
 
-The application is designed for containerized deployment:
+The application is designed for containerised deployment:
 
 ```bash
 # Build Docker image
@@ -161,15 +161,15 @@ The backend follows a layered architecture pattern:
 2. **Service Layer**: Business logic implementation
 3. **Repository Layer**: Data access and persistence
 4. **Domain Model**: Entity classes representing the business domain
-5. **Security**: Authentication and authorization controls
+5. **Security**: Authentication and authorisation controls
 
 ![Architecture Diagram](docs/architecture.png)
 *Architecture diagram shows the flow from controllers through services to repositories and the database.*
 
 ## Performance Considerations
 
-The backend implements several performance optimizations:
-- Database query optimization through indexing
+The backend implements several performance optimisations:
+- Database query optimisation through indexing
 - Connection pooling for database efficiency
 - Caching for frequently accessed data
 - Asynchronous processing for long-running operations
