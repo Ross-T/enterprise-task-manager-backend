@@ -14,4 +14,5 @@ public class ProjectResponse {
     private String name;
     private String description;
     private LocalDateTime createdAt;
+    private Integer taskCount;
 }
