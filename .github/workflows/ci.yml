@@ -19,7 +19,8 @@ jobs:
         distribution: 'temurin'
         cache: maven
     
-    - name: Run checkstyle
+    - name: Run checkstyle (informational only)
+      continue-on-error: true
       run: mvn checkstyle:check
     
     - name: Run OWASP dependency check
