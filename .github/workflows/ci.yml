@@ -19,8 +19,29 @@ jobs:
         distribution: 'temurin'
         cache: maven
     
-    - name: Build with Maven (verify compilation only)
-      run: mvn -B compile
+    - name: Run checkstyle
+      run: mvn checkstyle:check
     
-    - name: Verify Test Compilation
-      run: mvn -B test-compile
+    - name: Run OWASP dependency check
+      run: mvn org.owasp:dependency-check-maven:check
+    
+    - name: Build with Maven
+      run: mvn -B package -DskipTests
+    
+    - name: Run Unit Tests with Coverage
+      run: mvn test jacoco:report
+    
+    - name: Run BDD Tests
+      run: mvn test -Dtest=CucumberIntegrationTest
+    
+    - name: Generate Javadoc
+      run: mvn javadoc:javadoc
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: jar-and-docs
+        path: |
+          target/*.jar
+          target/site/apidocs
+          
