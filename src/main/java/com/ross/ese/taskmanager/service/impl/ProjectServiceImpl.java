@@ -4,6 +4,7 @@ import com.ross.ese.taskmanager.dto.ProjectCreateRequest;
 import com.ross.ese.taskmanager.dto.ProjectResponse;
 import com.ross.ese.taskmanager.dto.ProjectUpdateRequest;
 import com.ross.ese.taskmanager.model.Project;
+import com.ross.ese.taskmanager.model.Task;
 import com.ross.ese.taskmanager.repository.ProjectRepository;
 import com.ross.ese.taskmanager.repository.TaskRepository;
 import com.ross.ese.taskmanager.service.ProjectService;
@@ -74,14 +75,21 @@ public class ProjectServiceImpl implements ProjectService {
     }
     
     @Override
+    @Transactional
     public void deleteProject(Long id) {
         log.debug("Deleting project with id: {}", id);
-        if (!projectRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, 
-                "Project not found with id: " + id);
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                    "Project not found with id: " + id));
+        
+        // delete all tasks associated with the project before deleting it
+        List<Task> projectTasks = taskRepository.findByProjectId(id);
+        if (!projectTasks.isEmpty()) {
+            log.info("Deleting {} tasks associated with project id: {}", projectTasks.size(), id);
+            taskRepository.deleteAll(projectTasks);
         }
         
-        projectRepository.deleteById(id);
+        projectRepository.delete(project);
         log.info("Project deleted successfully with id: {}", id);
     }
     
@@ -91,7 +99,7 @@ public class ProjectServiceImpl implements ProjectService {
                 project.getName(),
                 project.getDescription(),
                 project.getCreatedAt(),
-                taskRepository.findByProjectId(project.getId()).size()
+                taskRepository.countByProjectId(project.getId())
         );
     }
 }
