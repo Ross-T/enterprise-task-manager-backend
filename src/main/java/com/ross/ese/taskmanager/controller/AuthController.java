@@ -38,18 +38,25 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
         try {
-            String token = authService.signUp(
+            String result = authService.signUp(
                     signupRequest.getEmail(),
                     signupRequest.getPassword(),
                     signupRequest.getUsername());
-    
-            if (token == null) {
+
+            if (result == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new MessageResponse("Error: Registration failed"));
             }
-    
+
+            // if we get "registered" instead of a token, email confirmation is required)
+            if (result.equals("registered")) {
+                return ResponseEntity.ok(new MessageResponse(
+                        "Registration successful! Please check your email to confirm your account."));
+            }
+
+            // already have a token, no email confirmation required
             return ResponseEntity.ok(new JwtResponse(
-                    token,
+                    result,
                     signupRequest.getUsername(),
                     signupRequest.getEmail()));
         } catch (Exception e) {
