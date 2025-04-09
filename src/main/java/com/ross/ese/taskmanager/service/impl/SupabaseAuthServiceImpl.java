@@ -31,39 +31,39 @@ public class SupabaseAuthServiceImpl implements SupabaseAuthService {
     public String signUp(String email, String password, String username) {
         try {
             log.debug("Attempting to sign up user with email: {}", email);
-            
+
             // Create request payload
             Map<String, Object> payload = new HashMap<>();
             payload.put("email", email);
             payload.put("password", password);
-        
+
             Map<String, Object> userMetadata = new HashMap<>();
             userMetadata.put("full_name", username);
             userMetadata.put("username", username);
             payload.put("data", userMetadata);
-            
-            log.debug("Registration payload (excluding sensitive data): {email: {}, data: {}}", 
-                      email, userMetadata);
-            
+
+            log.debug("Registration payload (excluding sensitive data): {email: {}, data: {}}",
+                    email, userMetadata);
+
             // Make the API call
             return supabaseAuthClient.post()
                     .uri("/auth/v1/signup")
                     .body(BodyInserters.fromValue(payload))
                     .retrieve()
                     .onStatus(
-                        HttpStatusCode::isError,
-                        (ClientResponse response) -> response.bodyToMono(String.class)
-                            .flatMap(body -> {
-                                log.error("Supabase signup error: {} - {}", 
-                                          response.statusCode(), body);
-                                return Mono.error(new RuntimeException(
-                                    "Supabase signup failed: " + response.statusCode() + " - " + body));
-                            })
-                    )
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                            HttpStatusCode::isError,
+                            (ClientResponse response) -> response.bodyToMono(String.class)
+                                    .flatMap(body -> {
+                                        log.error("Supabase signup error: {} - {}",
+                                                response.statusCode(), body);
+                                        return Mono.error(new RuntimeException(
+                                                "Supabase signup failed: " + response.statusCode() + " - " + body));
+                                    }))
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                    })
                     .map(response -> {
-                        log.debug("Supabase signup response received: {}", 
-                                 response.keySet().toString());
+                        log.debug("Supabase signup response received: {}",
+                                response.keySet().toString());
                         if (response.containsKey("access_token")) {
                             return (String) response.get("access_token");
                         } else if (response.containsKey("id")) {
@@ -75,7 +75,7 @@ public class SupabaseAuthServiceImpl implements SupabaseAuthService {
                         }
                     })
                     .block();
-                
+
         } catch (Exception e) {
             log.error("Error signing up user: {}", e.getMessage(), e);
             return null;
@@ -86,41 +86,50 @@ public class SupabaseAuthServiceImpl implements SupabaseAuthService {
     public String signIn(String email, String password) {
         try {
             log.debug("Attempting to sign in user with email: {}", email);
-            
+
             // Create request payload
             Map<String, Object> payload = new HashMap<>();
             payload.put("email", email);
             payload.put("password", password);
-            
+
             // Make the API call
             return supabaseAuthClient.post()
                     .uri("/auth/v1/token?grant_type=password")
                     .body(BodyInserters.fromValue(payload))
                     .retrieve()
                     .onStatus(
-                        HttpStatusCode::isError,
-                        (ClientResponse response) -> response.bodyToMono(String.class)
-                            .flatMap(body -> {
-                                log.error("Supabase signin error: {} - {}", 
-                                          response.statusCode(), body);
-                                return Mono.error(new RuntimeException(
-                                    "Supabase signin failed: " + response.statusCode() + " - " + body));
-                            })
-                    )
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                            HttpStatusCode::isError,
+                            (ClientResponse response) -> response.bodyToMono(String.class)
+                                    .flatMap(body -> {
+                                        if (body.contains("invalid_credentials")) {
+                                            log.info("Login attempt failed: Invalid credentials for email: {}", email);
+                                            return Mono.error(new RuntimeException("Invalid credentials"));
+                                        }
+
+                                        log.error("Supabase signin error: {} - {}",
+                                                response.statusCode(), body);
+                                        return Mono.error(new RuntimeException(
+                                                "Supabase signin failed: " + response.statusCode() + " - " + body));
+                                    }))
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                    })
                     .map(response -> {
                         if (response.containsKey("access_token")) {
                             return (String) response.get("access_token");
                         } else {
-                            log.warn("Signin response did not contain access_token: {}", 
-                                     response.keySet().toString());
+                            log.warn("Signin response did not contain access_token: {}",
+                                    response.keySet().toString());
                             return null;
                         }
                     })
                     .block();
-
         } catch (Exception e) {
-            log.error("Error signing in user: {}", e.getMessage(), e);
+            // Don't log stack trace for authentication failures
+            if (e.getMessage() != null && e.getMessage().equals("Invalid credentials")) {
+                log.info("Authentication failed for email: {}", email);
+            } else {
+                log.error("Error signing in user: {}", e.getMessage(), e);
+            }
             return null;
         }
     }
@@ -129,20 +138,20 @@ public class SupabaseAuthServiceImpl implements SupabaseAuthService {
     public boolean verifyToken(String token) {
         try {
             log.debug("Verifying token validity");
-            
+
             // Make the API call to verify the token
             return supabaseAuthClient.get()
                     .uri("/auth/v1/user")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
                     .onStatus(
-                        HttpStatusCode::isError,
-                        (ClientResponse response) -> {
-                            log.debug("Token invalid: {}", response.statusCode());
-                            return Mono.empty();
-                        }
-                    )
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                            HttpStatusCode::isError,
+                            (ClientResponse response) -> {
+                                log.debug("Token invalid: {}", response.statusCode());
+                                return Mono.empty();
+                            })
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                    })
                     .map(response -> {
                         boolean isValid = response != null && response.containsKey("id");
                         log.debug("Token validity check result: {}", isValid);
@@ -150,7 +159,7 @@ public class SupabaseAuthServiceImpl implements SupabaseAuthService {
                     })
                     .onErrorReturn(false)
                     .block();
-                    
+
         } catch (Exception e) {
             log.debug("Token verification failed with exception: {}", e.getMessage());
             return false;
