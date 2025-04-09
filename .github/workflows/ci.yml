@@ -29,13 +29,11 @@ jobs:
     - name: Build with Maven
       run: mvn -B package -DskipTests
     
-    - name: Run Unit Tests with Coverage (informational only)
-      continue-on-error: true
-      run: mvn test jacoco:report
-    
-    - name: Run BDD Tests (informational only)
-      continue-on-error: true
-      run: mvn test -Dtest=CucumberIntegrationTest
+    - name: Run Unit Tests with Coverage
+      run: mvn test jacoco:report -Dspring.profiles.active=test
+      
+    - name: Run BDD Tests
+      run: mvn test -Dtest=CucumberIntegrationTest -Dspring.profiles.active=test
     
     - name: Generate Javadoc
       run: mvn javadoc:javadoc
@@ -47,4 +45,3 @@ jobs:
         path: |
           target/*.jar
           target/site/apidocs
-          
