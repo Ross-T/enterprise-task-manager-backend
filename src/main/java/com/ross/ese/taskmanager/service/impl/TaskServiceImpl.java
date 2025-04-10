@@ -75,7 +75,9 @@ public class TaskServiceImpl implements TaskService {
         // Set project if provided
         if (request.getProjectId() != null) {
             projectRepository.findById(request.getProjectId())
-                    .ifPresent(task::setProject);
+                    .ifPresentOrElse(
+                            task::setProject,
+                            () -> log.warn("Project with id {} not found when creating task", request.getProjectId()));
         }
 
         Task savedTask = taskRepository.save(task);
