@@ -136,22 +136,33 @@ public class TaskServiceImpl implements TaskService {
     public void deleteTask(Long id) {
         log.debug("Deleting task with id: {}", id);
 
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Task not found with id: " + id));
+        try {
+            Task task = taskRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "Task not found with id: " + id));
 
-        // Extract project ID for cache eviction
-        Long projectId = Optional.ofNullable(task.getProject())
-                .map(Project::getId)
-                .orElse(null);
+            // Extract project ID for cache eviction
+            Long projectId = Optional.ofNullable(task.getProject())
+                    .map(Project::getId)
+                    .orElse(null);
 
-        if (projectId != null) {
-            cacheManager.getCache("tasks").evict("project-" + projectId);
-            cacheManager.getCache("projects").evict(projectId);
+            taskRepository.deleteById(id);
+
+            if (projectId != null) {
+                log.debug("Evicting caches for project ID: {}", projectId);
+                if (cacheManager.getCache("tasks") != null) {
+                    cacheManager.getCache("tasks").evict("project-" + projectId);
+                }
+                if (cacheManager.getCache("projects") != null) {
+                    cacheManager.getCache("projects").evict(projectId);
+                }
+            }
+            
+            log.info("Task deleted successfully with id: {}", id);
+        } catch (Exception e) {
+            log.error("Error deleting task with ID {}: {}", id, e.getMessage(), e);
+            throw e;
         }
-
-        taskRepository.deleteById(id);
-        log.info("Task deleted successfully with id: {}", id);
     }
 
     @Override
