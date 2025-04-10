@@ -10,6 +10,9 @@ import com.ross.ese.taskmanager.repository.TaskRepository;
 import com.ross.ese.taskmanager.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +32,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final TaskRepository taskRepository;
     
     @Override
+    @Cacheable(value = "projects", key = "'all'")
     public List<ProjectResponse> getAllProjects() {
         log.debug("Fetching all projects");
         return projectRepository.findAll().stream()
@@ -37,6 +41,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
     
     @Override
+    @Cacheable(value = "projects", key = "#id")
     public ProjectResponse getProjectById(Long id) {
         log.debug("Fetching project with id: {}", id);
         return projectRepository.findById(id)
@@ -46,6 +51,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
     
     @Override
+    @CacheEvict(value = "projects", key = "'all'")
     public ProjectResponse createProject(ProjectCreateRequest request) {
         log.debug("Creating new project with name: {}", request.getName());
         Project project = new Project();
@@ -59,15 +65,22 @@ public class ProjectServiceImpl implements ProjectService {
     }
     
     @Override
+    @Caching(evict = {
+        @CacheEvict(value = "projects", key = "#id"),
+        @CacheEvict(value = "projects", key = "'all'")
+    })
     public ProjectResponse updateProject(Long id, ProjectUpdateRequest request) {
         log.debug("Updating project with id: {}", id);
         Project existingProject = projectRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
                     "Project not found with id: " + id));
         
-        // Update fields if provided
-        if (request.getName() != null) existingProject.setName(request.getName());
-        if (request.getDescription() != null) existingProject.setDescription(request.getDescription());
+        if (request.getName() != null) {
+            existingProject.setName(request.getName());
+        }
+        if (request.getDescription() != null) {
+            existingProject.setDescription(request.getDescription());
+        }
         
         Project updatedProject = projectRepository.save(existingProject);
         log.info("Project updated successfully with id: {}", updatedProject.getId());
@@ -76,13 +89,19 @@ public class ProjectServiceImpl implements ProjectService {
     
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = "projects", key = "#id"),
+        @CacheEvict(value = "projects", key = "'all'"),
+        @CacheEvict(value = "tasks", key = "'all'"),
+        @CacheEvict(value = "tasks", key = "'project-' + #id")
+    })
     public void deleteProject(Long id) {
         log.debug("Deleting project with id: {}", id);
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
                     "Project not found with id: " + id));
         
-        // delete all tasks associated with the project before deleting it
+        // Delete all tasks associated with the project before deleting it
         List<Task> projectTasks = taskRepository.findByProjectId(id);
         if (!projectTasks.isEmpty()) {
             log.info("Deleting {} tasks associated with project id: {}", projectTasks.size(), id);
@@ -94,12 +113,13 @@ public class ProjectServiceImpl implements ProjectService {
     }
     
     private ProjectResponse convertToProjectResponse(Project project) {
+        Integer taskCount = taskRepository.countByProjectId(project.getId());
         return new ProjectResponse(
                 project.getId(),
                 project.getName(),
                 project.getDescription(),
                 project.getCreatedAt(),
-                taskRepository.countByProjectId(project.getId())
+                taskCount != null ? taskCount : 0
         );
     }
 }
