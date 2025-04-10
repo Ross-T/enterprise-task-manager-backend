@@ -32,4 +32,10 @@ build/
 ### VS Code ###
 .vscode/
 
+# Environment files with secrets
 .env
+.env.*
+!.env.example
+
+# Local development files
+*.local
