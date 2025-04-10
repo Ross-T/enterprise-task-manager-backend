@@ -97,7 +97,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     }
     
     /**
-     * Rate-limmited endpoints
+     * Rate-limited endpoints
      */
     private boolean isRateLimitedEndpoint(String path) {
         return (path.contains("/api/auth/") && !path.contains("/api/auth/verify")) || 
