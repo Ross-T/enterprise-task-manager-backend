@@ -69,7 +69,7 @@ This backend application is built with several enterprise-level qualities in min
     ```
 
 2.  **Configure Environment Variables (if running locally):**
-    Create a .env file in your root project directory, and make sure this files ISN'T committed (add it to .gitignore)
+    Create a .env file in your root project directory, and make sure this file isn't committed (add it to .gitignore)
     ```dotenv
     # Choose to run in dev or prod:
     SPRING_PROFILES_ACTIVE=dev
