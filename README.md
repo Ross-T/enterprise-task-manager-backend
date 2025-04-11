@@ -140,4 +140,4 @@ This application uses SpringDoc OpenAPI (Swagger) to automatically generate comp
 ## References
 
 * Spring Boot, Spring Security, Spring Data JPA, Maven, PostgreSQL, Supabase, JWT, OpenAPI, Bucket4j, Render
-* Generative AI tools were consulted and all final code/decisions were personally reviewed, understood, and adapted.
+* Generative AI tools were consulted and all final suggestions were personally reviewed, understood, and adapted.
